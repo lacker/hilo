@@ -36,6 +36,12 @@ Then install the `hilo` conda environment from the repo's `environment.yml`:
 conda env create
 ```
 
+Then, separately install `stable-baselines3`.
+
+```
+pip install stable-baselines3
+```
+
 If you make any updates to the environment, be sure to update `environment.yml` with:
 
 ```
