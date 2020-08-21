@@ -26,24 +26,10 @@ numbers makes anything work better.
 
 # Installation
 
-Get the `stable-baselines` dependencies described [here](sudo apt-get update && sudo apt-get install cmake libopenmpi-dev python3-dev zlib1g-dev).
-
-Install `conda`, I've been using `miniconda` but I don't think it matters.
-
-Then install the `hilo` conda environment from the repo's `environment.yml`:
-
 ```
-conda env create
+conda create --name hilo
+conda activate hilo
+pip install stable-baselines3[extra]
 ```
 
-Then, separately install `stable-baselines3`.
-
-```
-pip install stable-baselines3
-```
-
-If you make any updates to the environment, be sure to update `environment.yml` with:
-
-```
-conda env export --name hilo > environment.yml
-```
+You will need to rerun `conda activate hilo` whenever you are running this.
