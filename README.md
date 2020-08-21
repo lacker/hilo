@@ -23,3 +23,21 @@ is.
 Anyway, I am going to try some standard reinforcement learning
 algorithms on this, and see if different ways of representing the
 numbers makes anything work better.
+
+# Installation
+
+Get the `stable-baselines` dependencies described [here](sudo apt-get update && sudo apt-get install cmake libopenmpi-dev python3-dev zlib1g-dev).
+
+Install `conda`, I've been using `miniconda` but I don't think it matters.
+
+Then install the `hilo` conda environment from the repo's `environment.yml`:
+
+```
+conda env create
+```
+
+If you make any updates to the environment, be sure to update `environment.yml` with:
+
+```
+conda env export --name hilo > environment.yml
+```
