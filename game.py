@@ -1,6 +1,27 @@
 #!/usr/bin/env python
 
 import random
+import sys
+
+import gym
+from gym import spaces
+
+RANGE = 256
+
+
+class Env(gym.Env):
+    """
+    A custom environment for the hilo game.
+    """
+
+    metadata = {"render.modes": ["human"]}
+
+    def __init__(self):
+        super(Env, self).__init__()
+
+        self.action_space = spaces.Discrete(RANGE)
+
+        # TODO: set up self.observation_space
 
 
 class Game(object):
@@ -11,7 +32,7 @@ class Game(object):
         # For now, share the upper and lower bounds with the player.
         # These are inclusive.
         self.lower_bound = 0
-        self.upper_bound = 255
+        self.upper_bound = RANGE - 1
         self.log(
             f"I am thinking of a number from {self.lower_bound} to {self.upper_bound}."
         )
@@ -48,4 +69,9 @@ def play_human():
 
 
 if __name__ == "__main__":
-    play_human()
+    if "--play" in sys.argv:
+        play_human()
+    elif "--check" in sys.argv:
+        raise NotImplementedError("need to implement this")
+    else:
+        print("use a flag plz")
