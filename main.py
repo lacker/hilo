@@ -10,7 +10,7 @@ from stable_baselines3.common.env_checker import check_env
 from stable_baselines3 import PPO
 from stable_baselines3.ppo import MlpPolicy
 
-RANGE = 256
+RANGE = 15
 MODEL = "ppo_basic"
 
 
@@ -100,6 +100,8 @@ def demo():
         action, _states = model.predict(obs)
         obs, reward, done, info = env.step(action)
         env.render()
+        if done:
+            break
 
 
 if __name__ == "__main__":
