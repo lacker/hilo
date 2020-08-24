@@ -29,6 +29,7 @@ numbers makes anything work better.
 ```
 conda create --name hilo
 conda activate hilo
+conda install -c conda-forge jupyterlab
 pip install stable-baselines3[extra]
 ```
 

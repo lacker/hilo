@@ -7,8 +7,11 @@ import gym
 from gym import spaces
 import numpy as np
 from stable_baselines3.common.env_checker import check_env
+from stable_baselines3 import PPO
+from stable_baselines3.ppo import MlpPolicy
 
 RANGE = 256
+MODEL = "ppo_basic"
 
 
 class HiloEnv(gym.Env):
@@ -81,10 +84,32 @@ def check():
     check_env(env)
 
 
+def train():
+    env = HiloEnv()
+    model = PPO(MlpPolicy, env, verbose=1)
+    model.learn(total_timesteps=25000)
+    model.save(MODEL)
+
+
+def demo():
+    model = PPO.load(MODEL)
+    env = HiloEnv()
+    obs = env.reset()
+
+    while True:
+        action, _states = model.predict(obs)
+        obs, reward, done, info = env.step(action)
+        env.render()
+
+
 if __name__ == "__main__":
     if "--play" in sys.argv:
         play_human()
     elif "--check" in sys.argv:
         check()
+    elif "--train" in sys.argv:
+        train()
+    elif "--demo" in sys.argv:
+        demo()
     else:
         print("use a flag plz")
