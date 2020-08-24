@@ -9,7 +9,7 @@ from gym import spaces
 RANGE = 256
 
 
-class Env(gym.Env):
+class HiloEnv(gym.Env):
     """
     A custom environment for the hilo game.
     """
@@ -17,45 +17,48 @@ class Env(gym.Env):
     metadata = {"render.modes": ["human"]}
 
     def __init__(self):
-        super(Env, self).__init__()
+        super(HiloEnv, self).__init__()
 
         self.action_space = spaces.Discrete(RANGE)
+        self.observation_space = spaces.MultiDiscrete([RANGE, RANGE])
+        self.reset()
 
-        # TODO: set up self.observation_space
+    def observe(self):
+        return [self.lower_bound, self.upper_bound]
 
-
-class Game(object):
-    def __init__(self, verbose=False):
-        self.secret = random.randint(0, 255)
-        self.verbose = verbose
-
-        # For now, share the upper and lower bounds with the player.
-        # These are inclusive.
+    def reset(self):
+        self.secret = random.randrange(RANGE)
         self.lower_bound = 0
         self.upper_bound = RANGE - 1
-        self.log(
-            f"I am thinking of a number from {self.lower_bound} to {self.upper_bound}."
-        )
+        self.message = ""
 
-    def log(self, message):
-        if self.verbose:
-            print(message)
+    def step(self, action):
+        """action is a number to be guessed"""
+        if action <= self.secret:
+            self.lower_bound = max(action, self.lower_bound)
+            self.message = f"{action} is too low."
+        if action >= self.secret:
+            self.upper_bound = min(action, self.upper_bound)
+            self.message = f"{action} is too high."
+        if action == self.secret:
+            self.message = f"{action} is correct!"
+            reward = 1.0
+            done = True
+        else:
+            reward = 0.0
+            done = False
 
-    def guess(self, number):
-        if number < self.secret:
-            self.log(f"{number} is too low")
-            self.lower_bound = max(number, self.lower_bound)
-            return False
-        if number > self.secret:
-            self.log(f"{number} is too high")
-            self.upper_bound = min(number, self.upper_bound)
-            return False
-        self.log(f"{number} is correct!")
-        return True
+        return (self.observe(), reward, done, {})
+
+    def render(self, mode="human"):
+        if mode != "human":
+            raise NotImplementedError
+        print(self.message)
 
 
 def play_human():
-    game = Game(verbose=True)
+    game = HiloEnv()
+    print(f"guess a number from 0 to {RANGE - 1}.")
     while True:
         s = input("guess: ")
         try:
@@ -64,7 +67,9 @@ def play_human():
             print("bad number")
             continue
 
-        if game.guess(number):
+        _, _, done, _ = game.step(number)
+        game.render()
+        if done:
             break
 
 
