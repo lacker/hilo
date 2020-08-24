@@ -5,6 +5,8 @@ import sys
 
 import gym
 from gym import spaces
+import numpy as np
+from stable_baselines3.common.env_checker import check_env
 
 RANGE = 256
 
@@ -24,13 +26,14 @@ class HiloEnv(gym.Env):
         self.reset()
 
     def observe(self):
-        return [self.lower_bound, self.upper_bound]
+        return np.array([self.lower_bound, self.upper_bound])
 
     def reset(self):
         self.secret = random.randrange(RANGE)
         self.lower_bound = 0
         self.upper_bound = RANGE - 1
         self.message = ""
+        return self.observe()
 
     def step(self, action):
         """action is a number to be guessed"""
@@ -57,7 +60,7 @@ class HiloEnv(gym.Env):
 
 
 def play_human():
-    game = HiloEnv()
+    env = HiloEnv()
     print(f"guess a number from 0 to {RANGE - 1}.")
     while True:
         s = input("guess: ")
@@ -67,16 +70,21 @@ def play_human():
             print("bad number")
             continue
 
-        _, _, done, _ = game.step(number)
-        game.render()
+        _, _, done, _ = env.step(number)
+        env.render()
         if done:
             break
+
+
+def check():
+    env = HiloEnv()
+    check_env(env)
 
 
 if __name__ == "__main__":
     if "--play" in sys.argv:
         play_human()
     elif "--check" in sys.argv:
-        raise NotImplementedError("need to implement this")
+        check()
     else:
         print("use a flag plz")
