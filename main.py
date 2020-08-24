@@ -10,7 +10,7 @@ from stable_baselines3.common.env_checker import check_env
 from stable_baselines3 import PPO
 from stable_baselines3.ppo import MlpPolicy
 
-RANGE = 15
+RANGE = 31
 MODEL = "ppo_basic"
 
 
@@ -87,7 +87,7 @@ def check():
 def train():
     env = HiloEnv()
     model = PPO(MlpPolicy, env, verbose=1)
-    model.learn(total_timesteps=25000)
+    model.learn(total_timesteps=250000)
     model.save(MODEL)
 
 
@@ -97,7 +97,7 @@ def demo():
     obs = env.reset()
 
     while True:
-        action, _states = model.predict(obs)
+        action, _states = model.predict(obs, deterministic=True)
         obs, reward, done, info = env.step(action)
         env.render()
         if done:
