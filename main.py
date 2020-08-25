@@ -7,8 +7,9 @@ import gym
 from gym import spaces
 import numpy as np
 from stable_baselines3.common.env_checker import check_env
-from stable_baselines3 import PPO
-from stable_baselines3.ppo import MlpPolicy
+from stable_baselines3.common.monitor import Monitor
+from stable_baselines3 import DQN
+from stable_baselines3.dqn import MlpPolicy
 
 RANGE = 31
 MODEL = "ppo_basic"
@@ -85,14 +86,14 @@ def check():
 
 
 def train():
-    env = HiloEnv()
-    model = PPO(MlpPolicy, env, verbose=1, tensorboard_log="./tboard_log")
+    env = Monitor(HiloEnv(), "./tmp/")
+    model = DQN(MlpPolicy, env, verbose=1, tensorboard_log="./tboard_log")
     model.learn(total_timesteps=250000)
     model.save(MODEL)
 
 
 def demo():
-    model = PPO.load(MODEL)
+    model = DQN.load(MODEL)
     env = HiloEnv()
     obs = env.reset()
 
