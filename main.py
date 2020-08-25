@@ -86,7 +86,7 @@ def check():
 
 def train():
     env = HiloEnv()
-    model = PPO(MlpPolicy, env, verbose=1)
+    model = PPO(MlpPolicy, env, verbose=1, tensorboard_log="./tboard_log")
     model.learn(total_timesteps=250000)
     model.save(MODEL)
 
