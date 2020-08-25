@@ -11,8 +11,19 @@ from stable_baselines3.common.monitor import Monitor
 from stable_baselines3 import DQN
 from stable_baselines3.dqn import MlpPolicy
 
-RANGE = 31
+RANGE = 63
+CORRECT = 10.0
+INCORRECT = -1.0
 MODEL = "ppo_basic"
+
+
+def optimal(r=RANGE):
+    """The expected episode reward for optimal play"""
+    if r <= 1:
+        return CORRECT
+    odds_correct = 1.0 / r
+    odds_incorrect = 1 - odds_correct
+    return odds_correct * CORRECT + odds_incorrect * (INCORRECT + optimal((r - 1) / 2))
 
 
 class HiloEnv(gym.Env):
@@ -49,10 +60,10 @@ class HiloEnv(gym.Env):
             self.message = f"{action} is too high."
         if action == self.secret:
             self.message = f"{action} is correct!"
-            reward = 1.0
+            reward = CORRECT
             done = True
         else:
-            reward = 0.0
+            reward = INCORRECT
             done = False
 
         return (self.observe(), reward, done, {})
@@ -81,6 +92,7 @@ def play_human():
 
 
 def check():
+    print("reward for optimal play:", optimal())
     env = HiloEnv()
     check_env(env)
 
@@ -88,7 +100,7 @@ def check():
 def train():
     env = Monitor(HiloEnv(), "./tmp/")
     model = DQN(MlpPolicy, env, verbose=1, tensorboard_log="./tboard_log")
-    model.learn(total_timesteps=250000)
+    model.learn(total_timesteps=1000000)
     model.save(MODEL)
 
 
