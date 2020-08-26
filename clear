@@ -1,0 +1,3 @@
+#!/bin/bash
+rm -rf tboard_log/*
+rm tmp/*
