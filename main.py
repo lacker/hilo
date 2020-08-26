@@ -1,13 +1,16 @@
 #!/usr/bin/env python
 
+from datetime import timedelta
 import random
 import sys
+import time
 
 import gym
 from gym import spaces
 import numpy as np
 from stable_baselines3.common.env_checker import check_env
 from stable_baselines3.common.monitor import Monitor
+from stable_baselines3.common.vec_env import SubprocVecEnv
 from stable_baselines3 import PPO
 from stable_baselines3.ppo import MlpPolicy
 
@@ -15,6 +18,7 @@ RANGE = 63
 CORRECT = 10.0
 INCORRECT = -1.0
 MODEL = "ppo_basic"
+PARALLELISM = 1
 
 
 def optimal(r=RANGE):
@@ -98,9 +102,16 @@ def check():
 
 
 def train():
-    env = Monitor(HiloEnv(), "./tmp/")
+    make_env = lambda: Monitor(HiloEnv(), "./tmp/")
+    if PARALLELISM > 1:
+        env = SubprocVecEnv([make_env] * PARALLELISM)
+    else:
+        env = make_env()
     model = PPO(MlpPolicy, env, verbose=1, tensorboard_log="./tboard_log")
-    model.learn(total_timesteps=1000000)
+    start = time.time()
+    model.learn(total_timesteps=250000)
+    elapsed = time.time() - start
+    print(f"{timedelta(seconds=elapsed)} time elapsed")
     model.save(MODEL)
 
 

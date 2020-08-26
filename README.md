@@ -34,3 +34,17 @@ pip install stable-baselines3[extra]
 ```
 
 You will need to rerun `conda activate hilo` whenever you are running this.
+
+# Tips
+
+To see Tensorboard stats during training:
+
+```
+tensorboard --logdir ./tboard_log/
+```
+
+To check GPU utilization during training:
+
+```
+nvidia-smi -l 1
+```
