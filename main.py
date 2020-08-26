@@ -107,9 +107,17 @@ def train():
         env = SubprocVecEnv([make_env] * PARALLELISM)
     else:
         env = make_env()
-    model = PPO(MlpPolicy, env, verbose=1, tensorboard_log="./tboard_log")
+    net_arch = [{"pi": [64, 64], "vf": [64, 64]}]
+    policy_kwargs = dict(net_arch=net_arch)
+    model = PPO(
+        MlpPolicy,
+        env,
+        verbose=1,
+        policy_kwargs=policy_kwargs,
+        tensorboard_log="./tboard_log",
+    )
     start = time.time()
-    model.learn(total_timesteps=250000)
+    model.learn(total_timesteps=300000)
     elapsed = time.time() - start
     print(f"{timedelta(seconds=elapsed)} time elapsed")
     model.save(MODEL)
@@ -117,6 +125,7 @@ def train():
 
 def demo():
     model = PPO.load(MODEL)
+    print(model.policy.net_arch)
     env = HiloEnv()
     obs = env.reset()
 
