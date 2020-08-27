@@ -132,7 +132,7 @@ def train():
         tensorboard_log="./tboard_log",
     )
     start = time.time()
-    model.learn(total_timesteps=300000, callback=make_eval_callback())
+    model.learn(total_timesteps=300000)
     elapsed = time.time() - start
     print(f"{timedelta(seconds=elapsed)} time elapsed")
     model.save(MODEL)
