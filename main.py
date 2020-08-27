@@ -15,7 +15,7 @@ from stable_baselines3.common.vec_env import SubprocVecEnv
 from stable_baselines3 import PPO
 from stable_baselines3.ppo import MlpPolicy
 
-RANGE = 127
+RANGE = 31
 CORRECT = 10.0
 INCORRECT = -1.0
 MODEL = "ppo_basic"
@@ -132,7 +132,7 @@ def train():
         tensorboard_log="./tboard_log",
     )
     start = time.time()
-    model.learn(total_timesteps=1000000)
+    model.learn(total_timesteps=300000)
     elapsed = time.time() - start
     print(f"{timedelta(seconds=elapsed)} time elapsed")
     model.save(MODEL)
