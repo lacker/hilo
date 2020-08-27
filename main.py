@@ -8,6 +8,7 @@ import time
 import gym
 from gym import spaces
 import numpy as np
+from stable_baselines3.common.callbacks import EvalCallback
 from stable_baselines3.common.env_checker import check_env
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.vec_env import SubprocVecEnv
@@ -51,11 +52,13 @@ class HiloEnv(gym.Env):
         self.secret = random.randrange(RANGE)
         self.lower_bound = 0
         self.upper_bound = RANGE - 1
+        self.steps = 0
         self.message = ""
         return self.observe()
 
     def step(self, action):
         """action is a number to be guessed"""
+        self.steps += 1
         if action <= self.secret:
             self.lower_bound = max(action, self.lower_bound)
             self.message = f"{action} is too low."
@@ -69,6 +72,10 @@ class HiloEnv(gym.Env):
         else:
             reward = INCORRECT
             done = False
+
+        if self.steps >= 2 * RANGE:
+            # Prevent the game from lasting infinite time.
+            done = True
 
         return (self.observe(), reward, done, {})
 
@@ -101,8 +108,16 @@ def check():
     check_env(env)
 
 
+def make_env():
+    return Monitor(HiloEnv(), "./tmp/")
+
+
+def make_eval_callback():
+    eval_env = make_env()
+    return EvalCallback(eval_env, eval_freq=1000, deterministic=True, render=False)
+
+
 def train():
-    make_env = lambda: Monitor(HiloEnv(), "./tmp/")
     if PARALLELISM > 1:
         env = SubprocVecEnv([make_env] * PARALLELISM)
     else:
@@ -117,7 +132,7 @@ def train():
         tensorboard_log="./tboard_log",
     )
     start = time.time()
-    model.learn(total_timesteps=300000)
+    model.learn(total_timesteps=300000, callback=make_eval_callback())
     elapsed = time.time() - start
     print(f"{timedelta(seconds=elapsed)} time elapsed")
     model.save(MODEL)
