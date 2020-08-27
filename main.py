@@ -15,7 +15,8 @@ from stable_baselines3.common.vec_env import SubprocVecEnv
 from stable_baselines3 import PPO
 from stable_baselines3.ppo import MlpPolicy
 
-RANGE = 31
+BITS = 7
+RANGE = 2 ** BITS - 1
 CORRECT = 10.0
 INCORRECT = -1.0
 MODEL = "ppo_basic"
@@ -31,6 +32,22 @@ def optimal(r=RANGE):
     return odds_correct * CORRECT + odds_incorrect * (INCORRECT + optimal((r - 1) / 2))
 
 
+def to_bits(n):
+    answer = []
+    for _ in range(BITS):
+        answer.append(n % 2)
+        n = n // 2
+    answer.reverse()
+    return answer
+
+
+def from_bits(bits):
+    answer = 0
+    for bit in bits:
+        answer = 2 * answer + bit
+    return answer
+
+
 class HiloEnv(gym.Env):
     """
     A custom environment for the hilo game.
@@ -41,12 +58,12 @@ class HiloEnv(gym.Env):
     def __init__(self):
         super(HiloEnv, self).__init__()
 
-        self.action_space = spaces.Discrete(RANGE)
-        self.observation_space = spaces.MultiDiscrete([RANGE, RANGE])
+        self.action_space = spaces.MultiDiscrete([2] * BITS)
+        self.observation_space = spaces.MultiDiscrete([2] * (2 * BITS))
         self.reset()
 
     def observe(self):
-        return np.array([self.lower_bound, self.upper_bound])
+        return np.array(to_bits(self.lower_bound) + to_bits(self.upper_bound))
 
     def reset(self):
         self.secret = random.randrange(RANGE)
@@ -57,8 +74,9 @@ class HiloEnv(gym.Env):
         return self.observe()
 
     def step(self, action):
-        """action is a number to be guessed"""
+        """action is a number to be guessed, in bits form"""
         self.steps += 1
+        action = from_bits(action)
         if action <= self.secret:
             self.lower_bound = max(action, self.lower_bound)
             self.message = f"{action} is too low."
@@ -96,7 +114,7 @@ def play_human():
             print("bad number")
             continue
 
-        _, _, done, _ = env.step(number)
+        _, _, done, _ = env.step(to_bits(number))
         env.render()
         if done:
             break
@@ -132,7 +150,7 @@ def train():
         tensorboard_log="./tboard_log",
     )
     start = time.time()
-    model.learn(total_timesteps=300000)
+    model.learn(total_timesteps=3000000)
     elapsed = time.time() - start
     print(f"{timedelta(seconds=elapsed)} time elapsed")
     model.save(MODEL)
